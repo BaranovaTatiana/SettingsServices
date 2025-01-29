@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettingsService.API", "SettingsService.API\SettingsService.API.csproj", "{9E4768B3-963A-4965-8BDD-F0FC9FB206FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettingsService.Db", "SettingsService.Db\SettingsService.Db.csproj", "{DC8A4266-C333-4677-B329-5D711114CCF4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9E4768B3-963A-4965-8BDD-F0FC9FB206FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E4768B3-963A-4965-8BDD-F0FC9FB206FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E4768B3-963A-4965-8BDD-F0FC9FB206FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E4768B3-963A-4965-8BDD-F0FC9FB206FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC8A4266-C333-4677-B329-5D711114CCF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC8A4266-C333-4677-B329-5D711114CCF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC8A4266-C333-4677-B329-5D711114CCF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC8A4266-C333-4677-B329-5D711114CCF4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
