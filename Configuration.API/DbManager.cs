@@ -1,33 +1,30 @@
 using System.Text.Json;
-using Configurations.Db;
-using Configurations.Db.Entity;
+using Configuration.Db;
+using Configuration.Db.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Configuration.API;
 
 public class DbManager : IDbManager
 {
-    const string ErrorMessage = "Непредвиденная ошибка";
+    private static ConfigDbContext _dbContext;
+    public DbManager(ConfigDbContext dbContext)
+    {
+       _dbContext = dbContext;
+    }
+
     public async Task<Result> AddUser(User user)
     {
-        try
-        {
-            await using var db = new ConfigDbContext();
-            db.Users.Add(new Configurations.Db.Entity.User
+            _dbContext.Users.Add(new Db.Entity.User
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 MiddleName = user.MiddleName,
             });
 
-            await db.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
 
             return new Result(Status.Success, "Пользователь добавлен");
-        }
-        catch (Exception e)
-        {
-            return new Result(Status.Error, ErrorMessage);
-        }
     }
     
 
@@ -35,82 +32,61 @@ public class DbManager : IDbManager
     {
         var settingsStr = JsonSerializer.Serialize(config.Settings);
 
-        try
-        {
-            await using (var db = new ConfigDbContext())
-            {
-                var userId = GetUserId(config, db);
-                if (CheckExistConfig(config, db, userId))
+        
+                var userId = GetUserId(config);
+                if (CheckExistConfig(config, userId))
                 {
                     return new Result(Status.Error, 
                         "Такая конфигурация уже существует для пользователя " +
                         $"{config.User.FirstName} {config.User.MiddleName} {config.User.LastName}");
                 }
 
+                var t = _dbContext.Users.Select(x => config.User.Equals(x));
+
                 if (userId == 0)
                 {
                     return new Result(Status.Error, "Некорректное имя пользователя");
                 }
 
-                await AddConfig(db, userId);
-            }
+                await AddConfig();
             
             return new Result(Status.Success, "Конфигурация успешно добавлена");
-        }
-        catch (Exception e)
-        {
-            return new Result(Status.Error, ErrorMessage);
-        }
 
-        async Task AddConfig(ConfigDbContext db, int userId)
+        async Task AddConfig()
         {
             var guid = Guid.NewGuid();
-            db.Configurations.Add(new Configurations.Db.Entity.Configuration
+            _dbContext.Configurations.Add(new Db.Entity.Configuration
             {
                 Guid = guid,
                 Name = config.Name,
-                UserId = userId,
-                Id = 1
+                UserId = userId
             });
 
-            db.ConfigurationVersions.Add(new ConfigurationVersion()
+            _dbContext.ConfigurationVersions.Add(new ConfigurationVersion()
             {
                 ConfigurationGuid = guid,
                 VersionNumber = 1,
                 SettingsData = settingsStr
             });
 
-            await db.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
         }
     }
 
     public List<FullConfigurationModel> GetConfigurationsByDateAsync(DateTime date)
     {
         Func<ConfigurationVersion, bool> predicate = c => c.СreationDate.Date == date.Date;
-
-        try
-        {
-            using var db = new ConfigDbContext();
-        
-            var data = GetData(db)
+            var data = GetData()
                 .Where(x => x.ConfigurationVersions.Any(predicate));
 
             var configs = MapViewConfiguration(data, predicate);//
 
             return configs;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
     }
 
     public List<FullConfigurationModel> GetConfigurationsByNameAsync(string name)
     {
-        using var db = new ConfigDbContext();
-        
-        var data = GetData(db)
+        var data = GetData()
             .Where(c => c.Name == name);
 
         var configs = MapViewConfiguration(data);
@@ -122,7 +98,7 @@ public class DbManager : IDbManager
     {
         using var db = new ConfigDbContext();
 
-        var data = GetData(db);
+        var data = GetData();
         var configs = MapViewConfiguration(data);
 
         return configs;
@@ -130,33 +106,23 @@ public class DbManager : IDbManager
 
     public async Task<Result> UpdateConfiguration(Guid guid, Settings settings)
     {
-        try
-        {
-            await using var db = new ConfigDbContext();
-            {
-                var lastVersionNumber = db.ConfigurationVersions
+                var lastVersionNumber = _dbContext.ConfigurationVersions
                     .Where(x => x.ConfigurationGuid == guid)
                     .Max(x => x.VersionNumber);
 
-                db.ConfigurationVersions.Add(new ConfigurationVersion()
+                _dbContext.ConfigurationVersions.Add(new ConfigurationVersion()
                 {
                     ConfigurationGuid = guid,
                     VersionNumber = lastVersionNumber + 1,
                     SettingsData = JsonSerializer.Serialize(settings)
                 });
 
-                await db.SaveChangesAsync();
-            }
+                await _dbContext.SaveChangesAsync();
 
             return new Result(Status.Success, "Конфигурация обновлена");
-        }
-        catch (Exception e)
-        {
-            return new Result(Status.Error, ErrorMessage);
-        }
     }
 
-    private static List<FullConfigurationModel> MapViewConfiguration(IEnumerable<Configurations.Db.Entity.Configuration> configurations,
+    private static List<FullConfigurationModel> MapViewConfiguration(IEnumerable<Db.Entity.Configuration> configurations,
         Func<ConfigurationVersion, bool>? predicate = null)
     {
         return configurations.Select(c => new FullConfigurationModel
@@ -175,24 +141,24 @@ public class DbManager : IDbManager
             .ToList();
     }
 
-    private static IEnumerable<Configurations.Db.Entity.Configuration> GetData(ConfigDbContext db)
+    private static IEnumerable<Db.Entity.Configuration> GetData()
     {
-        return db.Configurations
+        return _dbContext.Configurations
             .Include(x => x.ConfigurationVersions)
             .Include(x => x.User);
     }
 
-    private static int GetUserId(CreatedConfigurationModel config, ConfigDbContext db)
+    private static int GetUserId(CreatedConfigurationModel config)
     {
-        var user = db.Users.FirstOrDefault(user => user.FirstName == config.User.FirstName &&
-                                               user.MiddleName == config.User.MiddleName &&
-                                               user.LastName == config.User.LastName);
+        var user = _dbContext.Users.FirstOrDefault(user => user.FirstName == config.User.FirstName &&
+                                                           user.MiddleName == config.User.MiddleName &&
+                                                           user.LastName == config.User.LastName);
 
         return user?.Id ?? 0;
     }
 
-    private static bool CheckExistConfig(CreatedConfigurationModel config, ConfigDbContext db, int userId)
+    private static bool CheckExistConfig(CreatedConfigurationModel config, int userId)
     {
-        return db.Configurations.Any(c => c.Name == config.Name && c.UserId == userId);
+        return _dbContext.Configurations.Any(c => c.Name == config.Name && c.UserId == userId);
     }
 }

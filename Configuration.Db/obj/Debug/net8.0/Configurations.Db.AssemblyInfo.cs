@@ -10,12 +10,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("Configuration.API")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("Configurations.Db")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+83c236ac5588f7d51cafcbfb607790dd930ad7bc")]
-[assembly: System.Reflection.AssemblyProductAttribute("Configuration.API")]
-[assembly: System.Reflection.AssemblyTitleAttribute("Configuration.API")]
+[assembly: System.Reflection.AssemblyProductAttribute("Configurations.Db")]
+[assembly: System.Reflection.AssemblyTitleAttribute("Configurations.Db")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // Создано классом WriteCodeFragment MSBuild.

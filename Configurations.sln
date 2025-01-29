@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Configuration.API", "Configuration.API\Configuration.API.csproj", "{9E4768B3-963A-4965-8BDD-F0FC9FB206FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Configurations.Db", "Configurations.Db\Configurations.Db.csproj", "{DC8A4266-C333-4677-B329-5D711114CCF4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Configuration.Db", "Configuration.Db\Configuration.Db.csproj", "{DC8A4266-C333-4677-B329-5D711114CCF4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
