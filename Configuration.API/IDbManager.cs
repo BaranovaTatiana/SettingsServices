@@ -9,6 +9,7 @@ public interface IDbManager
     List<FullConfigurationModel> GetConfigurationsByDateAsync(DateTime date);
     
     List<FullConfigurationModel> GetConfigurationsByNameAsync(string name);
+    List<FullConfigurationModel> GetAllConfigurations();
     
     Task<Result> UpdateConfiguration(Guid guid, Settings settings);
 }

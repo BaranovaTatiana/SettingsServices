@@ -118,6 +118,16 @@ public class DbManager : IDbManager
         return configs;
     }
 
+    public List<FullConfigurationModel> GetAllConfigurations()
+    {
+        using var db = new ConfigDbContext();
+
+        var data = GetData(db);
+        var configs = MapViewConfiguration(data);
+
+        return configs;
+    }
+
     public async Task<Result> UpdateConfiguration(Guid guid, Settings settings)
     {
         try

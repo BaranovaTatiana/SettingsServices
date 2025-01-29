@@ -1,13 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Configuration.API.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class ConfigController(ILogger<ConfigController> logger, IDbManager manager) : ControllerBase
+public class ConfigController(ILogger<ConfigController> logger, IDbManager manager)
+    : ControllerBase
 {
     private readonly ILogger<ConfigController> _logger = logger;
-
+    
     [HttpPut("CreateConfiguration")]
     public async Task<IActionResult> CreateConfiguration([FromBody]CreatedConfigurationModel config)
     {
@@ -30,6 +32,12 @@ public class ConfigController(ILogger<ConfigController> logger, IDbManager manag
     public List<FullConfigurationModel> GetConfigurationsByName([FromQuery]string name)
     {
         return manager.GetConfigurationsByNameAsync(name);
+    }
+    
+    [HttpGet("GetAllConfigurations")]
+    public List<FullConfigurationModel> GetAllConfigurations()
+    {
+        return manager.GetAllConfigurations();
     }
     
     

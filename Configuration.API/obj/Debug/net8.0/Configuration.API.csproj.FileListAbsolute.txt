@@ -76,3 +76,8 @@ C:\Users\Alisa\RiderProjects\Configurations\Configuration.API\bin\Debug\net8.0\S
 C:\Users\Alisa\RiderProjects\Configurations\Configuration.API\bin\Debug\net8.0\System.Text.Encodings.Web.dll
 C:\Users\Alisa\RiderProjects\Configurations\Configuration.API\bin\Debug\net8.0\System.Text.Json.dll
 C:\Users\Alisa\RiderProjects\Configurations\Configuration.API\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
+C:\Users\Alisa\RiderProjects\Configurations\Configuration.API\bin\Debug\net8.0\Microsoft.Extensions.Diagnostics.Abstractions.dll
+C:\Users\Alisa\RiderProjects\Configurations\Configuration.API\bin\Debug\net8.0\Microsoft.Extensions.Hosting.Abstractions.dll
+C:\Users\Alisa\RiderProjects\Configurations\Configuration.API\bin\Debug\net8.0\Microsoft.Extensions.ObjectPool.dll
+C:\Users\Alisa\RiderProjects\Configurations\Configuration.API\bin\Debug\net8.0\Newtonsoft.Json.dll
+C:\Users\Alisa\RiderProjects\Configurations\Configuration.API\bin\Debug\net8.0\System.Net.WebSockets.WebSocketProtocol.dll
