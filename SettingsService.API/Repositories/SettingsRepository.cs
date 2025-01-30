@@ -21,12 +21,12 @@ public class SettingsRepository : ISettingsRepository
     {
         var settingsStr = JsonSerializer.Serialize(settingsModel.Settings);
         
-        var personId = GetUserId(settingsModel);
+        var personId = GetPersonId(settingsModel.Person);
         if (CheckExistSettings(settingsModel, personId))
         {
             return new Result(Status.Error, 
                 "Такая конфигурация уже существует для пользователя " +
-                $"{settingsModel.User.FirstName} {settingsModel.User.MiddleName} {settingsModel.User.LastName}");
+                $"{settingsModel.Person.FirstName} {settingsModel.Person.MiddleName} {settingsModel.Person.LastName}");
         }
 
         if (personId == 0)
@@ -89,22 +89,51 @@ public class SettingsRepository : ISettingsRepository
         return configs;
     }
 
-    public async Task<Result> UpdateSettings(Guid guid, Settings settings)
+    public async Task<Result> UpdateSettings(CreatedSettingsModel settings)
     {
+        var personId = GetPersonId(settings.Person);
+        
+        var guid = _dbContext.SettingsPreset
+            .FirstOrDefault(s => s.Name == settings.Name && s.PersonId == personId)?.Guid;
+
+        if (guid == default)
+        {
+            return new Result(Status.Error, "Такой конфигурации не существует");
+        }
+        
         var lastVersionNumber = _dbContext.SettingsPresetVersion
             .Where(x => x.SettingsPresetGuid == guid)
             .Max(x => x.VersionNumber);
 
-        _dbContext.SettingsPresetVersion.Add(new SettingsPresetVersion()
+        _dbContext.SettingsPresetVersion.Add(new SettingsPresetVersion
         {
-            SettingsPresetGuid = guid,
+            SettingsPresetGuid = guid.Value,
             VersionNumber = lastVersionNumber + 1,
             Settings = JsonSerializer.Serialize(settings)
         });
 
         await _dbContext.SaveChangesAsync();
 
-        return new Result(Status.Success, "Конфигурация обновлена");
+        return new Result(Status.Success, $"Конфигурация {settings.Name} обновлена " +
+                                          $"для пользователя {settings.Person.FirstName} {settings.Person.MiddleName} {settings.Person.LastName}");
+    }
+
+    public async Task<Result> RemoveSettings(string name, Person person)
+    {
+        var personId = GetPersonId(person);
+        var settingsPreset = _dbContext.SettingsPreset
+            .FirstOrDefault(s => s.Name == name && s.PersonId == personId);
+
+        if (settingsPreset == null)
+        {
+            return new Result(Status.Error, "Такой конфигурации не существует");
+        }
+
+        _dbContext.SettingsPreset.Remove(settingsPreset);
+        await _dbContext.SaveChangesAsync();
+
+        return new Result(Status.Success, $"Конфигурация {name} удалена " +
+                                          $"для пользователя {person.FirstName} {person.MiddleName} {person.LastName}");
     }
 
     private static List<FullSettingsModel> MapViewSettingsModel(IEnumerable<SettingsPreset> configurations,
@@ -121,7 +150,7 @@ public class SettingsRepository : ISettingsRepository
                             Settings = JsonSerializer.Deserialize<Settings>(x.Settings)
                         })
                     .ToList(),
-                User = new Person { FirstName = c.Person.FirstName, MiddleName = c.Person.MiddleName, LastName = c.Person.LastName}
+                Person = new Person { FirstName = c.Person.FirstName, MiddleName = c.Person.MiddleName, LastName = c.Person.LastName}
             })
             .ToList();
     }
@@ -133,13 +162,13 @@ public class SettingsRepository : ISettingsRepository
             .Include(x => x.Person);
     }
 
-    private static int GetUserId(CreatedSettingsModel settingsModel)
+    private static int GetPersonId(Person person)
     {
-        var user = _dbContext.Person.FirstOrDefault(user => user.FirstName == settingsModel.User.FirstName &&
-                                                           user.MiddleName == settingsModel.User.MiddleName &&
-                                                           user.LastName == settingsModel.User.LastName);
+        var user = _dbContext.Person.FirstOrDefault(user => user.FirstName == person.FirstName &&
+                                                           user.MiddleName == person.MiddleName &&
+                                                           user.LastName == person.LastName);
 
-        var t = _dbContext.Person.Select(x => settingsModel.User.Equals(x));////
+        var t = _dbContext.Person.Select(x => person.Equals(x));////
         return user?.Id ?? 0;
     }
 

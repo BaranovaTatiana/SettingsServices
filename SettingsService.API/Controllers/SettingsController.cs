@@ -1,26 +1,40 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using SettingsService.API.Abstractions;
-using SettingsService.API.Models.Settings;
+using SettingsService.API.Models;
 using SettingsService.API.Models.SettingsPresets;
 
 namespace SettingsService.API.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class SettingsController(ILogger<SettingsController> logger, ISettingsRepository repository)
+public class SettingsController(ISettingsRepository repository, IHubContext<SettingsMessageHub> hubContext)
     : ControllerBase
 {
-    private readonly ILogger<SettingsController> _logger = logger;//
-    
     [HttpPut("CreateSettings")]
     public async Task<IActionResult> CreateSettings([FromBody]CreatedSettingsModel config)
     {
         var result = await repository.CreateSettings(config);
         if (result.Status == Status.Error)
         {
+            await hubContext.Clients.Group("CreateSettings").SendAsync("ReceiveCreateSettingsMessage", result.Message);
             return BadRequest(result.Message);
         }
         
+        await hubContext.Clients.Group("CreateSettings").SendAsync("ReceiveCreateSettingsMessage", result.Message);
+        return Ok(result.Message);
+    }
+    
+    [HttpPut("UpdateSettings")]
+    public async Task<IActionResult> UpdateSettings([FromBody] CreatedSettingsModel settings)
+    {
+        var result = await repository.UpdateSettings(settings);
+        if (result.Status == Status.Error)
+        {
+            return BadRequest(result.Message);
+        }
+
+        await hubContext.Clients.Group("UpdateSettings").SendAsync("ReceiveUpdateSettingsMessage", result.Message);
         return Ok(result.Message);
     }
     
@@ -42,15 +56,12 @@ public class SettingsController(ILogger<SettingsController> logger, ISettingsRep
         return repository.GetAllSettings();
     }
     
-    [HttpPut("UpdateSettings")]
-    public async Task<IActionResult> UpdateSettings([FromQuery]Guid guid, [FromBody] Settings settings)
+    [HttpDelete("RemoveSettings")]
+    public async Task<Result> RemoveSettings(string name, Person person)
     {
-        var result = await repository.UpdateSettings(guid, settings);
-        if (result.Status == Status.Error)
-        {
-            return BadRequest(result.Message);
-        }
+        var result =  await repository.RemoveSettings(name, person);
+        await hubContext.Clients.Group("RemoveSettings").SendAsync("ReceiveRemoveSettingsMessage", result.Message);
         
-        return Ok(result.Message);
+        return result;
     }
 }
