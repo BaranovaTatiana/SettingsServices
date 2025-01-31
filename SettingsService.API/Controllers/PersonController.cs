@@ -9,7 +9,7 @@ namespace SettingsService.API.Controllers;
 public class PersonController(ILogger<SettingsController> logger, IPersonRepository repository) : ControllerBase
 {
     [HttpPost("CreatePerson")]
-    public async Task<IActionResult> CreatePerson(Person person)
+    public async Task<IActionResult> CreatePerson(PersonModel person)
     {
         var result = await repository.CreatePerson(person);
         

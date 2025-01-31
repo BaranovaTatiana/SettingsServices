@@ -57,7 +57,7 @@ public class SettingsController(ISettingsRepository repository, IHubContext<Sett
     }
     
     [HttpDelete("RemoveSettings")]
-    public async Task<Result> RemoveSettings(string name, Person person)
+    public async Task<Result> RemoveSettings(string name, PersonModel person)
     {
         var result =  await repository.RemoveSettings(name, person);
         await hubContext.Clients.Group("RemoveSettings").SendAsync("ReceiveRemoveSettingsMessage", result.Message);

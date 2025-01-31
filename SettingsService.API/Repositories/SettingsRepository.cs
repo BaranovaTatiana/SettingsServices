@@ -1,11 +1,11 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using SettingsService.API.Abstractions;
+using SettingsService.API.Models;
 using SettingsService.API.Models.Settings;
 using SettingsService.API.Models.SettingsPresets;
 using SettingsService.Db;
 using SettingsService.Db.Entity;
-using Person = SettingsService.API.Models.Person;
 
 namespace SettingsService.API.Repositories;
 
@@ -118,7 +118,7 @@ public class SettingsRepository : ISettingsRepository
                                           $"для пользователя {settings.Person.FirstName} {settings.Person.MiddleName} {settings.Person.LastName}");
     }
 
-    public async Task<Result> RemoveSettings(string name, Person person)
+    public async Task<Result> RemoveSettings(string name, PersonModel person)
     {
         var personId = GetPersonId(person);
         var settingsPreset = _dbContext.SettingsPreset
@@ -150,7 +150,7 @@ public class SettingsRepository : ISettingsRepository
                             Settings = JsonSerializer.Deserialize<Settings>(x.Settings)
                         })
                     .ToList(),
-                Person = new Person { FirstName = c.Person.FirstName, MiddleName = c.Person.MiddleName, LastName = c.Person.LastName}
+                Person = new PersonModel { FirstName = c.Person.FirstName, MiddleName = c.Person.MiddleName, LastName = c.Person.LastName}
             })
             .ToList();
     }
@@ -162,13 +162,12 @@ public class SettingsRepository : ISettingsRepository
             .Include(x => x.Person);
     }
 
-    private static int GetPersonId(Person person)
+    private static int GetPersonId(PersonModel person)
     {
         var user = _dbContext.Person.FirstOrDefault(user => user.FirstName == person.FirstName &&
                                                            user.MiddleName == person.MiddleName &&
                                                            user.LastName == person.LastName);
-
-        var t = _dbContext.Person.Select(x => person.Equals(x));////
+        
         return user?.Id ?? 0;
     }
 

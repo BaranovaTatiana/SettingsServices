@@ -4,5 +4,5 @@ public class BaseSettingsModel
 {
     public string Name { get; init; }
     
-    public Person Person { get; init; }
+    public PersonModel Person { get; init; }
 }
